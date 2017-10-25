@@ -30,8 +30,29 @@ class Todo(db.Model):
         complete = db.Column(db.Boolean)
 
 
+def token_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = None
+
+        if 'x-access-token' in request.headers:
+            token = request.headers['x-access-token']
+
+        if not token:
+            return jsonify({'message': 'Token is missing!'})
+
+        try:
+            data = jwt.JWT(key=app.config['SECRET_KEY'], jwt=token).claims
+            current_user = User.query.filter_by(public_id=data['public_id']).first()
+
+        return f(current_user, *args, **kwargs)
+
+    return decorated
+
+
 @app.route('/user', methods=['GET'])
-def get_all_users():
+@token_required(current_user)
+def get_all_users(current_user):
     users = User.query.all()
     if not users:
         return jsonify({'message' : 'No users found!'})
