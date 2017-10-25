@@ -2,4 +2,4 @@ Flask
 Flask-SQLAlchemy
 SQLAlchemy
 werkzeug
-PyJWT
+jwcrypto
