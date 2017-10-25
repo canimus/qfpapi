@@ -2,12 +2,13 @@ from flask import Flask, request, jsonify, make_response
 from flask_sqlalchemy import SQLAlchemy
 import uuid
 from werkzeug.security import generate_password_hash, check_password_hash
-import jwt
+from jwcrypto import jwt, jwk
 import datetime
+from functools import wraps
 
 app = Flask(__name__)
 
-app.config['SECRET_KEY'] = "thisissecret"
+app.config['SECRET_KEY'] = jwk.JWK(generate='oct', size=256)
 app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///todo.db"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -90,9 +91,14 @@ def login():
         return make_response('Could not verify', 401, {'WWW-Authenticate' : 'Basic realm: "Login required!"'})
 
     if check_password_hash(user.password, auth.password):
-        token = jwt.encode({'public_id' : user.public_id, 'exp' : datetime.datetime.utcnow() + datetime.timedelta(minutes=30)}, app.config['SECRET_KEY'])
+        payload = dict()
+        payload['public_id'] = user.public_id
+        payload['exp'] = datetime.datetime.utcnow() + datetime.timedelta(minutes=30)
+        token = jwt.JWT(header={"alg": "HS256"}, claims=payload)
+        token.make_signed_token(app.config['SECRET_KEY'])
+        #token = jwt.encode({'public_id' : user.public_id, 'exp' : datetime.datetime.utcnow() + datetime.timedelta(minutes=30)}, )
 
-        return jsonify({'token' : token.decode('UTF-8')})
+        return jsonify({'token' : token.serialize().decode('UTF-8')})
 
     return make_response('Could not verify', 401, {'WWW-Authenticate' : 'Basic realm: "Login required!"'})
 
