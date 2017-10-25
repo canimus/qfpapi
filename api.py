@@ -93,7 +93,7 @@ def login():
     if check_password_hash(user.password, auth.password):
         payload = dict()
         payload['public_id'] = user.public_id
-        payload['exp'] = datetime.datetime.utcnow() + datetime.timedelta(minutes=30)
+        payload['exp'] = str(datetime.datetime.utcnow() + datetime.timedelta(minutes=30))
         token = jwt.JWT(header={"alg": "HS256"}, claims=payload)
         token.make_signed_token(app.config['SECRET_KEY'])
         #token = jwt.encode({'public_id' : user.public_id, 'exp' : datetime.datetime.utcnow() + datetime.timedelta(minutes=30)}, )
