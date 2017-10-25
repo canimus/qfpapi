@@ -98,7 +98,7 @@ def login():
         token.make_signed_token(app.config['SECRET_KEY'])
         #token = jwt.encode({'public_id' : user.public_id, 'exp' : datetime.datetime.utcnow() + datetime.timedelta(minutes=30)}, )
 
-        return jsonify({'token' : token.serialize().decode('UTF-8')})
+        return jsonify({'token' : token.serialize()})
 
     return make_response('Could not verify', 401, {'WWW-Authenticate' : 'Basic realm: "Login required!"'})
 
