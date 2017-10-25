@@ -44,6 +44,8 @@ def token_required(f):
         try:
             data = jwt.JWT(key=app.config['SECRET_KEY'], jwt=token).claims
             current_user = User.query.filter_by(public_id=data['public_id']).first()
+        except:
+            return jsonify({'message' : 'Token is invalid!'}), 401
 
         return f(current_user, *args, **kwargs)
 
@@ -51,7 +53,7 @@ def token_required(f):
 
 
 @app.route('/user', methods=['GET'])
-@token_required(current_user)
+@token_required
 def get_all_users(current_user):
     users = User.query.all()
     if not users:
