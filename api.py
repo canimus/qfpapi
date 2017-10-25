@@ -43,6 +43,7 @@ def token_required(f):
 
         try:
             data = jwt.JWT(key=app.config['SECRET_KEY'], jwt=token).claims
+            print(data)
             current_user = User.query.filter_by(public_id=data['public_id']).first()
         except:
             return jsonify({'message' : 'Token is invalid!'}), 401
