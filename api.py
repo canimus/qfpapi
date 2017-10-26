@@ -102,7 +102,12 @@ def promote_user(public_id):
     return jsonify({'message' : 'User has been promoted!'})
 
 @app.route('/user/<public_id>', methods=['DELETE'])
-def delete_user(public_id):
+@token_required
+def delete_user(current_user, public_id):
+
+    if not current_user.admin
+        return jsonify({'message' : 'Restricted to adminstrators'})
+
     user = User.query.filter_by(public_id = public_id).first()
     if not user:
         return jsonify({'message' : 'No user found!'})
@@ -137,7 +142,6 @@ def login():
         return jsonify({'token' : token.serialize()})
 
     return make_response('Could not verify', 401, {'WWW-Authenticate' : 'Basic realm: "Login required!"'})
-
 
 if __name__ == '__main__':
         app.run(debug=True, host="0.0.0.0")
