@@ -105,7 +105,7 @@ def promote_user(public_id):
 @token_required
 def delete_user(current_user, public_id):
 
-    if not current_user.admin
+    if not current_user.admin:
         return jsonify({'message' : 'Restricted to adminstrators'})
 
     user = User.query.filter_by(public_id = public_id).first()
