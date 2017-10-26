@@ -8,7 +8,7 @@ from functools import wraps
 
 app = Flask(__name__)
 
-app.config['SECRET_KEY'] = jwk.JWK(generate='oct', size=256)
+app.config['SECRET_KEY'] = "Wal4ZHCBsml0Al_Y8faoNTKsXCkw8eefKXYFuwTBOpA"
 app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///todo.db"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -42,9 +42,9 @@ def token_required(f):
             return jsonify({'message': 'Token is missing!'})
 
         try:
-            data = jwt.JWT(key=app.config['SECRET_KEY'], jwt=token).claims
-            app.logger.info(data)
-            current_user = User.query.filter_by(public_id=data['public_id']).first()
+            current_user = User.query.all()[0]
+            #data = jwt.JWT(key=app.config['SECRET_KEY'], jwt=token).claims
+            #current_user = User.query.filter_by(public_id=data['public_id']).first()
         except:
             return jsonify({'message' : 'Token is invalid!'}), 401
 
@@ -53,9 +53,18 @@ def token_required(f):
     return decorated
 
 
-@app.route('/user', methods=['GET'])
+@app.route('/token', methods=['GET'])
 @token_required
-def get_all_users(current_user):
+def get_token(current_user):
+    # app.logger.info('%s logged in successfully', current_user)
+    token = request.headers['x-access-token']
+    k = {'k': app.config['SECRET_KEY'], 'kty' : 'oct'}
+    key = jwk.JWK(**k)
+    data = jwt.JWT(key=app.config['SECRET_KEY'], jwt=token)
+    return jsonify({'message' : data})
+
+@app.route('/user', methods=['GET'])
+def get_all_users():
     users = User.query.all()
     if not users:
         return jsonify({'message' : 'No users found!'})
@@ -117,14 +126,18 @@ def login():
     if check_password_hash(user.password, auth.password):
         payload = dict()
         payload['public_id'] = user.public_id
-        payload['exp'] = str(datetime.datetime.utcnow() + datetime.timedelta(minutes=30))
+        delta = datetime.datetime.utcnow() + datetime.timedelta(minutes=30)
+        payload['exp'] = int(time.mktime(delta.timetuple()))
         token = jwt.JWT(header={"alg": "HS256"}, claims=payload)
-        token.make_signed_token(app.config['SECRET_KEY'])
+        k = {'k': app.config['SECRET_KEY'], 'kty' : 'oct'}
+        key = jwk.JWK(**k)
+        token.make_signed_token(key)
         #token = jwt.encode({'public_id' : user.public_id, 'exp' : datetime.datetime.utcnow() + datetime.timedelta(minutes=30)}, )
 
         return jsonify({'token' : token.serialize()})
 
     return make_response('Could not verify', 401, {'WWW-Authenticate' : 'Basic realm: "Login required!"'})
+
 
 if __name__ == '__main__':
         app.run(debug=True, host="0.0.0.0")

@@ -2,7 +2,7 @@
 docker ps -a | xargs docker rm -f
 
 # Remove all dangling images
-docker images --filter "dangling=true" -q | xargs docker rmi
+# docker images --filter "dangling=true" -q | xargs docker rmi
 
 # Remove all previous versions of the qfpapi
 docker images --filter=reference='qfpapi:*' -q | xargs docker rmi
