@@ -5,6 +5,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from jwcrypto import jwt, jwk
 import datetime
 import time
+import json
 from functools import wraps
 
 app = Flask(__name__)
@@ -61,8 +62,8 @@ def get_token(current_user):
     token = request.headers['x-access-token']
     k = {'k': app.config['SECRET_KEY'], 'kty' : 'oct'}
     key = jwk.JWK(**k)
-    data = jwt.JWT(key=app.config['SECRET_KEY'], jwt=token)
-    return jsonify({'message' : data})
+    data = jwt.JWT(key=key, jwt=token)
+    return jsonify(json.loads(data.claims))
 
 @app.route('/user', methods=['GET'])
 def get_all_users():
