@@ -31,7 +31,6 @@ class Todo(db.Model):
         text = db.Column(db.String(50))
         complete = db.Column(db.Boolean)
 
-
 def token_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
@@ -48,9 +47,6 @@ def token_required(f):
             key = jwk.JWK(**k)
             data = json.loads(jwt.JWT(key=key, jwt=token).claims)
             current_user = User.query.filter_by(public_id=data['public_id']).first()
-            #current_user = User.query.all()[0]
-            #data = jwt.JWT(key=app.config['SECRET_KEY'], jwt=token).claims
-            #current_user = User.query.filter_by(public_id=data['public_id']).first()
         except:
             return jsonify({'message' : 'Token is invalid!'}), 401
 
@@ -58,11 +54,9 @@ def token_required(f):
 
     return decorated
 
-
 @app.route('/token', methods=['GET'])
 @token_required
 def get_token(current_user):
-    # app.logger.info('%s logged in successfully', current_user)
     token = request.headers['x-access-token']
     k = {'k': app.config['SECRET_KEY'], 'kty' : 'oct'}
     key = jwk.JWK(**k)
@@ -132,13 +126,13 @@ def login():
     if check_password_hash(user.password, auth.password):
         payload = dict()
         payload['public_id'] = user.public_id
+        # Token expiration is 30 minutes
         delta = datetime.datetime.utcnow() + datetime.timedelta(minutes=30)
         payload['exp'] = int(time.mktime(delta.timetuple()))
         token = jwt.JWT(header={"alg": "HS256"}, claims=payload)
         k = {'k': app.config['SECRET_KEY'], 'kty' : 'oct'}
         key = jwk.JWK(**k)
         token.make_signed_token(key)
-        #token = jwt.encode({'public_id' : user.public_id, 'exp' : datetime.datetime.utcnow() + datetime.timedelta(minutes=30)}, )
 
         return jsonify({'token' : token.serialize()})
 
