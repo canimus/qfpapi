@@ -44,7 +44,11 @@ def token_required(f):
             return jsonify({'message': 'Token is missing!'})
 
         try:
-            current_user = User.query.all()[0]
+            k = {'k': app.config['SECRET_KEY'], 'kty' : 'oct'}
+            key = jwk.JWK(**k)
+            data = json.loads(jwt.JWT(key=key, jwt=token).claims)
+            current_user = User.query.filter_by(public_id=data['public_id']).first()
+            #current_user = User.query.all()[0]
             #data = jwt.JWT(key=app.config['SECRET_KEY'], jwt=token).claims
             #current_user = User.query.filter_by(public_id=data['public_id']).first()
         except:
@@ -63,7 +67,7 @@ def get_token(current_user):
     k = {'k': app.config['SECRET_KEY'], 'kty' : 'oct'}
     key = jwk.JWK(**k)
     data = jwt.JWT(key=key, jwt=token)
-    return jsonify(json.loads(data.claims))
+    return jsonify({'name' : current_user.name})
 
 @app.route('/user', methods=['GET'])
 def get_all_users():
