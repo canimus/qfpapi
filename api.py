@@ -12,7 +12,7 @@ from functools import wraps
 app = Flask(__name__)
 
 app.config['SECRET_KEY'] = "Wal4ZHCBsml0Al_Y8faoNTKsXCkw8eefKXYFuwTBOpA"
-app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///todo.db"
+app.config['SQLALCHEMY_DATABASE_URI'] = "mysql://root:root@qfp-db/qfp"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Retrieve only table colimns defined in models as a function

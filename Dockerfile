@@ -5,9 +5,7 @@ EXPOSE 5000
 
 WORKDIR /usr/src/app
 
-ADD requirements.txt ./
+ADD requirements.txt /usr/src/app/
 RUN pip install -r requirements.txt
 
-ADD . .
-RUN python setup.py
-CMD ["python", "api.py"]
+ADD . /usr/src/app/
