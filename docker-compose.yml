@@ -1,0 +1,21 @@
+version: '3'
+
+services:
+  qfp-db:
+    image: mysql:5.7.20
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: qfp
+    ports:
+      - "3306:3306"
+  qfp-app:
+    build: .
+    command: python api.py
+    volumes:
+      - .:/usr/src/app
+    ports:
+      - "5000:5000"
+    depends_on:
+      - qfp-db
+    links:
+      - qfp-db:qfp-db
