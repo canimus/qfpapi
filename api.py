@@ -8,6 +8,7 @@ import time
 import json
 from functools import wraps
 
+# Init Flask
 app = Flask(__name__)
 
 app.config['SECRET_KEY'] = "Wal4ZHCBsml0Al_Y8faoNTKsXCkw8eefKXYFuwTBOpA"
